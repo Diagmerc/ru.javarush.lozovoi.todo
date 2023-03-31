@@ -7,6 +7,8 @@ import ru.lozovoi.domain.Task;
 import ru.lozovoi.service.ServiceTask;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Controller
 @RequestMapping("/")
@@ -25,6 +27,12 @@ public class TaskController {
 
         List<Task> tasks = serviceTask.getAll((page - 1) * limit, limit);
         model.addAttribute("tasks", tasks);
+        model.addAttribute("current_page", page);
+        int totalPage = (int) Math.ceil(1.0 * serviceTask.getAllCount() / limit);
+        if(totalPage > 1){
+            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPage).boxed().toList();
+            model.addAttribute("page_numbers", pageNumbers);
+        }
         return "tasks";
     }
 
@@ -43,12 +51,12 @@ public class TaskController {
         return tasks(model, 1, 10);
     }
 
-//    @PostMapping("/{id}")
-//    public String delete(Model model, @PathVariable Integer id) {
-//        if(id==null || id <= 0){
-//            throw new RuntimeException("Invalid id");
-//        }
-//        serviceTask.delete(id);
-//        return tasks(model, 1, 10);
-//    }
+    @DeleteMapping("/{id}")
+    public String delete(Model model, @PathVariable Integer id) {
+        if(id==null || id <= 0){
+            throw new RuntimeException("Invalid id");
+        }
+        serviceTask.delete(id);
+        return tasks(model, 1, 10);
+    }
 }
